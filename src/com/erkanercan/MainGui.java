@@ -1,7 +1,6 @@
 package com.erkanercan;
 
 import javax.swing.*;
-import javax.swing.event.ChangeListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
@@ -12,16 +11,20 @@ import java.sql.*;
 import java.util.Arrays;
 
 public class MainGui {
-    private JButton buttonMessage;
+    private JButton readOgrenciNetworkCsvButton;
     private JPanel panelMain;
-    private JTextPane textPane;
-    private JPanel solPanel;
-    private JPanel sagPanel;
     private JPanel altPanel;
     private JPanel ortaPanel;
-    private JProgressBar progressBar1;
+    private JButton readOgrenciProfilCsvButton;
+    private JButton readOgrenciIsimCsvButton;
+    private JTextArea searchTextArea;
+    private JButton searchButton;
     public Connection conn = null;
     public int count;
+    boolean isRead1=false,
+            isRead2=false,
+            isRead3=false;
+
 
     public void dbConnect(){
         String databaseURL = "jdbc:mysql://localhost:3306/muh4";
@@ -42,6 +45,145 @@ public class MainGui {
             ex.printStackTrace();
         }
     }
+
+    public void readNetwork(){
+        try {
+            BufferedReader csvReader = new BufferedReader(new FileReader("../AppSwing/csvFiles/ogrenciNetwork.csv"));
+            String line = null;
+
+            while ((line = csvReader.readLine()) != null) {
+                String[] split = line.split(",");//Satırı parçala
+
+                String friends = "";
+                for(int a = 1; a<split.length; a++)
+                {
+                    if(split[a]!="")
+                    {
+                        friends += split[a] + ",";//Arkadaşları ayır
+                    }
+                }
+                StringBuilder sb = new StringBuilder(friends);
+                sb.deleteCharAt(sb.length() - 1);
+                String resultString = sb.toString();
+                count++;
+                String query="INSERT INTO network VALUES('"+
+                        count+
+                        "','"+
+                        split[0]+
+                        "','"+
+                        resultString+
+                        "')";
+                try {
+                    Statement stmt = conn.createStatement();
+                    stmt.executeUpdate(query);
+                    System.out.println("Made "+count);
+
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+            isRead1=true;
+        }
+        catch(FileNotFoundException ex) {
+            System.err.println("File was not found");
+        }
+        catch(IOException ioe) {
+            System.err.println("There was an error while reading the file");
+        }
+    }
+
+    public void readProfile(){
+        try {
+            BufferedReader csvReader = new BufferedReader(new FileReader("../AppSwing/csvFiles/ogrenciProfil.csv"));
+            String line = null;
+            count=0;
+
+            while ((line = csvReader.readLine()) != null) {
+                String[] split = line.split(",");//Satırı parçala
+
+                String attributes = "";
+                for(int a = 1; a<split.length; a++)
+                {
+                    if(split[a]!="")
+                    {
+                        attributes += split[a] + ",";//Arkadaşları ayır
+                    }
+                }
+                StringBuilder sb = new StringBuilder(attributes);
+                sb.deleteCharAt(sb.length() - 1);
+                String resultString = sb.toString();
+                count++;
+                String query="INSERT INTO profil VALUES('"+
+                        count+
+                        "','"+
+                        split[0]+
+                        "','"+
+                        resultString+
+                        "')";
+                try {
+                    Statement stmt = conn.createStatement();
+                    stmt.executeUpdate(query);
+                    System.out.println("Made "+count);
+
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+            isRead2=true;
+        }
+        catch(FileNotFoundException ex) {
+            System.err.println("File was not found");
+        }
+        catch(IOException ioe) {
+            System.err.println("There was an error while reading the file");
+        }
+    }
+
+    public void readNames(){
+        try {
+            BufferedReader csvReader = new BufferedReader(new FileReader("../AppSwing/csvFiles/ogrencilistesi.csv"));
+            String line = null;
+            count=0;
+
+            while ((line = csvReader.readLine()) != null) {
+                String[] split = line.split(",");//Satırı parçala
+
+                String attributes = "";
+                for(int a = 1; a<split.length; a++)
+                {
+                    if(split[a]!="")
+                    {
+                        attributes += split[a] + ",";//Arkadaşları ayır
+                    }
+                }
+
+                count++;
+                String query="INSERT INTO isimler VALUES('"+
+                        count+
+                        "','"+
+                        split[0]+
+                        "','"+
+                        split[1].toUpperCase()+
+                        "')";
+                try {
+                    Statement stmt = conn.createStatement();
+                    stmt.executeUpdate(query);
+                    System.out.println("Made "+count+Arrays.toString(split));
+
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+            isRead3=true;
+        }
+        catch(FileNotFoundException ex) {
+            System.err.println("File was not found");
+        }
+        catch(IOException ioe) {
+            System.err.println("There was an error while reading the file");
+        }
+    }
+
 
 
     public MainGui() {
@@ -74,58 +216,43 @@ public class MainGui {
             e.printStackTrace();
         }
 
-        buttonMessage.addActionListener(new ActionListener() {
+        //Listeners.
+        readOgrenciNetworkCsvButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                readNetwork();
+            }
+        });
+        readOgrenciProfilCsvButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                readProfile();
+            }
+        });
+        readOgrenciIsimCsvButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                readNames();
+            }
+        });
+        searchButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (isRead1 && isRead2 && isRead3){
 
-                textPane.setText("");
-                String fileResult = "";
-                try {
-                    BufferedReader csvReader = new BufferedReader(new FileReader("../AppSwing/csvFiles/ogrenciNetwork.csv"));
-                    String line = null;
-
-                    while ((line = csvReader.readLine()) != null) {
-                        String[] split = line.split(",");//Satırı parçala
-
-                        String friends = "";
-                        for(int a = 1; a<split.length; a++)
-                        {
-                            if(split[a]!="")
-                            {
-                                friends += split[a] + ",";//Arkadaşları ayır
-                            }
-                        }
-                        StringBuilder sb = new StringBuilder(friends);
-                        sb.deleteCharAt(sb.length() - 1);
-                        String resultString = sb.toString();
-                        count++;
-                        String query="INSERT INTO network VALUES('"+count+"','"+split[0]+"','"+resultString+"')";
-                        try {
-                            Statement stmt = conn.createStatement();
-                            stmt.executeUpdate(query);
-                            System.out.println("Made "+count);
-
-                        } catch (SQLException e1) {
-                            e1.printStackTrace();
-                        }
-                    }
                 }
-                catch(FileNotFoundException ex) {
-                    System.err.println("File was not found");
+                else{
+                    JOptionPane.showMessageDialog(null,"You need to read files first!");
                 }
-                catch(IOException ioe) {
-                    System.err.println("There was an error while reading the file");
-                }
-                //textPane.setText();
-
             }
         });
     }
 
     public static void main(String[] args) {
-        JFrame frame = new JFrame("MainGui");
+        JFrame frame = new JFrame("Logistic Regression");
         frame.setContentPane(new MainGui().panelMain);
         frame.setSize(1280,720);
+
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
