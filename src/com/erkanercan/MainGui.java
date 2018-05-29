@@ -1,6 +1,5 @@
 package com.erkanercan;
 
-import com.mysql.cj.xdevapi.SqlDataResult;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -27,7 +26,7 @@ public class MainGui {
     private JTextArea textArea1;
     public Connection conn = null;
     public int count;
-    boolean isRead1=false,
+    public boolean isRead1=false,
             isRead2=false,
             isRead3=false;
     public ResultSet sqlDataResult;
@@ -459,13 +458,18 @@ public class MainGui {
                                 }
                             }
 
+
                             for (int a=0;a<10;a++){
                                 query="SELECT name FROM isimler WHERE ogrno = "+ suggestTable.get(a).get(0);
                                 sqlDataResult=stmt.executeQuery(query);
-                                sqlDataResult.next();
+                                //sqlDataResult.next();
 
                                 while (sqlDataResult.next()){
-                                    System.out.println(sqlDataResult.getString(0));
+                                    textArea1.append(suggestTable.get(a).get(0));
+                                    textArea1.append("\n");
+                                    textArea1.append(sqlDataResult.getString(1));
+                                    textArea1.append("\n");
+                                    System.out.println(sqlDataResult.getString(1));
                                     System.out.println(suggestTable.get(a).get(0));
                                 }
                             }
